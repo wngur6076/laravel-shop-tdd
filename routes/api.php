@@ -2,8 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +17,11 @@ use App\Http\Controllers\RegisterController;
 */
 
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
-    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+    Route::group(['middleware' => 'guest:api'], function () {
+        Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+        Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+    });
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::delete('/login', [LoginController::class, 'destroy'])->name('login.destroy');
+    });
 });

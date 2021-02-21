@@ -15,7 +15,7 @@ class RegisterManagementTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_guest_can_be_created()
+    public function a_user_can_be_created()
     {
         $response = $this->postJson(route('register.store'), $this->data());
 
