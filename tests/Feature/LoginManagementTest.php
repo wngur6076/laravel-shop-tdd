@@ -7,11 +7,17 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
+/**
+ * @testdox 로그인 관련 테스트
+ */
 class LoginManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     * @testdox 사용자는 로그인 할 수 있다.
+     */
     public function a_user_can_be_login()
     {
         $user = User::factory()->create($this->data());
@@ -30,19 +36,24 @@ class LoginManagementTest extends TestCase
         $this->assertAuthenticated();
     }
 
-    /** @test */
+    /**
+     * @test
+     * @testdox 이메일 인증 사용자만 로그인 할 수 있다.
+     */
     public function only_email_authenticated_user_can_login()
     {
         $user = User::factory()->create(array_merge($this->data(), ['activated' => false]));
 
-        // id/pw 입력 후 로그인 한다.
         $payload = ['email' => $user->email, 'password' => 'password'];
         $this->postJson(route('login.store'), $payload)->assertStatus(401);
 
         $this->assertGuest();
     }
 
-    /** @test */
+    /**
+     * @test
+     * @testdox 가입한 사용자만 로그인 할 수 있다.
+     */
     public function must_be_a_register_user()
     {
         User::factory()->create($this->data());
@@ -54,14 +65,16 @@ class LoginManagementTest extends TestCase
 
     }
 
-    /** @test */
+    /**
+     * @test
+     * @testdox 사용자는 로그아웃 할 수 있다.
+     */
     public function a_user_can_be_logout()
     {
         $user = User::factory()->create($this->data());
-        $this->actingAs($user);
         $token = \JWTAuth::fromUser($user);
 
-        $this->deleteJson(route('login.destroy'), [], ['Authorization' => 'Bearer ' . $token])
+        $this->actingAs($user)->deleteJson(route('login.destroy'), [], ['Authorization' => 'Bearer ' . $token])
             ->assertStatus(200);
 
         $this->assertGuest();

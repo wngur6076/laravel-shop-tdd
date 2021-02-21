@@ -10,12 +10,18 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/**
+ * @testdox 회원가입 관련 테스트
+ */
 class RegisterManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function a_user_can_be_created()
+    /**
+     * @test
+     * @testdox 사용자 회원가입 할 수 있다.
+     */
+    public function a_user_can_be_register()
     {
         $response = $this->postJson(route('register.store'), $this->data());
 
@@ -32,7 +38,10 @@ class RegisterManagementTest extends TestCase
             ]);
     }
 
-    /** @test */
+    /**
+     * @test
+     * @testdox 필드들은 반드시 입력해야 한다.
+     */
     public function fields_are_required()
     {
         collect(['name', 'email', 'password'])
@@ -45,19 +54,11 @@ class RegisterManagementTest extends TestCase
             });
     }
 
-    /** @test */
-    public function a_password_is_min_number()
-    {
-        $testPassword = ['1', '12', '123', '1234',
-            '12345', '123456', '1234567'];
-        $response = $this->post(route('register.store'),
-            array_merge($this->data(), ['password' => $testPassword[mt_rand(0, 6)]]));
-        $response->assertSessionHasErrors('password');
-        $this->assertCount(0, User::all());
-    }
-
-    /** @test */
-    public function a_email_must_be_email_format()
+    /**
+     * @test
+     * @testdox 이메일 필드는 이메일 형식이어야 한다.
+     */
+    public function an_email_must_be_email_format()
     {
         $response = $this->post(route('register.store'),
             array_merge($this->data(), ['email' => 'test']));
@@ -65,8 +66,11 @@ class RegisterManagementTest extends TestCase
         $this->assertCount(0, User::all());
     }
 
-    /** @test */
-    public function a_email_is_unique()
+    /**
+     * @test
+     * @testdox 이메일 필드는 유니크해야 한다.
+     */
+    public function an_email_is_unique()
     {
         $this->post(route('register.store'), $this->data(),  ['email' => 'test@test.com']);
         $response = $this->post(route('register.store'), $this->data(),  ['email' => 'test@test.com']);
@@ -74,7 +78,10 @@ class RegisterManagementTest extends TestCase
         $this->assertCount(1, User::all());
     }
 
-    /** @test */
+    /**
+     * @test
+     * @testdox 가입인증 코드가 null이 아니다.
+     */
     public function a_confirm_code_is_not_null()
     {
         $this->post(route('register.store'), $this->data());
@@ -82,7 +89,10 @@ class RegisterManagementTest extends TestCase
         $this->assertNotNull($user->confirm_code);
     }
 
-    /** @test */
+    /**
+     * @test
+     * @testdox 가입인증 이메일을 보낼 수 있다.
+     */
     public function register_email_can_be_sent()
     {
         Mail::fake();
