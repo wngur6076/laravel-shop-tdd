@@ -15,9 +15,9 @@ class RegisterManagementTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_user_can_be_created()
+    public function a_guest_can_be_created()
     {
-        $response = $this->postJson('/api/auth/register', $this->data());
+        $response = $this->postJson(route('register.store'), $this->data());
 
         $user = User::first();
         $this->assertCount(1, User::all());
@@ -27,7 +27,7 @@ class RegisterManagementTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJson([
-                'success' => true,
+                'status' => 'success',
                 'data' => true,
             ]);
     }
@@ -37,7 +37,7 @@ class RegisterManagementTest extends TestCase
     {
         collect(['name', 'email', 'password'])
             ->each(function ($field) {
-                $response = $this->post('/api/auth/register',
+                $response = $this->post(route('register.store'),
                     array_merge($this->data(), [$field => '']));
 
                 $response->assertSessionHasErrors($field);
@@ -50,7 +50,7 @@ class RegisterManagementTest extends TestCase
     {
         $testPassword = ['1', '12', '123', '1234',
             '12345', '123456', '1234567'];
-        $response = $this->post('/api/auth/register',
+        $response = $this->post(route('register.store'),
             array_merge($this->data(), ['password' => $testPassword[mt_rand(0, 6)]]));
         $response->assertSessionHasErrors('password');
         $this->assertCount(0, User::all());
@@ -59,7 +59,7 @@ class RegisterManagementTest extends TestCase
     /** @test */
     public function a_email_must_be_email_format()
     {
-        $response = $this->post('/api/auth/register',
+        $response = $this->post(route('register.store'),
             array_merge($this->data(), ['email' => 'test']));
         $response->assertSessionHasErrors('email');
         $this->assertCount(0, User::all());
@@ -68,8 +68,8 @@ class RegisterManagementTest extends TestCase
     /** @test */
     public function a_email_is_unique()
     {
-        $this->post('/api/auth/register', $this->data(),  ['email' => 'test@test.com']);
-        $response = $this->post('/api/auth/register', $this->data(),  ['email' => 'test@test.com']);
+        $this->post(route('register.store'), $this->data(),  ['email' => 'test@test.com']);
+        $response = $this->post(route('register.store'), $this->data(),  ['email' => 'test@test.com']);
         $response->assertSessionHasErrors('email');
         $this->assertCount(1, User::all());
     }
@@ -77,19 +77,17 @@ class RegisterManagementTest extends TestCase
     /** @test */
     public function a_confirm_code_is_not_null()
     {
-        $this->withoutExceptionHandling();
-        $this->post('/api/auth/register', $this->data());
+        $this->post(route('register.store'), $this->data());
         $user = User::first();
         $this->assertNotNull($user->confirm_code);
     }
 
     /** @test */
-    public function register_send_it_certified_mail()
+    public function register_email_can_be_sent()
     {
-        $this->withoutExceptionHandling();
         Mail::fake();
 
-        $this->post('/api/auth/register', $this->data());
+        $this->post(route('register.store'), $this->data());
         $user = User::first();
 
         Mail::assertSent(RegisterConfirmMail::class, function ($mail) use ($user) {

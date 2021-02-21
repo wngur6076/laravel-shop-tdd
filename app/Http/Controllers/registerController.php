@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Mail\RegisterConfirmMail;
 use Illuminate\Support\Facades\Hash;
 
-class registerController extends Controller
+class RegisterController extends Controller
 {
     public function store()
     {
@@ -23,9 +23,9 @@ class registerController extends Controller
         );
 
         return response()->json([
-            'success' => true,
-            'data'    => $user,
+            'status' => 'success',
             'message' => '입력하신 메일함에서 인증확인 메일을 확인해주세요.',
+            'data'    => $user,
         ], 201);
     }
 
