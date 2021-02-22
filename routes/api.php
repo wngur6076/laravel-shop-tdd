@@ -21,7 +21,7 @@ Route::prefix('auth')->group(function () {
     Route::group(['middleware' => 'guest:api'], function () {
         Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
         Route::post('/login', [LoginController::class, 'store'])->name('login.store');
-        Route::post('/verification', [VerificationController::class, 'store'])->name('verification.store');
+        Route::post('/verification', VerificationController::class)->name('verification');
     });
     Route::group(['middleware' => 'auth:api'], function () {
         Route::delete('/login', [LoginController::class, 'destroy'])->name('login.destroy');

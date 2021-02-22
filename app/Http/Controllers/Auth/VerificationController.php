@@ -5,26 +5,25 @@ namespace App\Http\Controllers\Auth;
 use App\Models\User;
 use App\Traits\AuthTrait;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\ModelNotFoundException as ModelNotFoundException;
 
 class VerificationController extends Controller
 {
     use AuthTrait;
 
-    public function store()
+    public function __invoke()
     {
-        $user = User::whereConfirmCode(request('code'))->first();
-
-        if(! $user) {
+        try {
+            $user = User::whereConfirmCode(request('code'))->firstOrFail();
+            // 유저한테 활성화 요청한다.
+            $user->activation();
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'code_denied',
                 'message' => '존재하지 않는 코드입니다.',
-                'error' => '401'
-            ], 401);
+                'error' => '404'
+            ], 404);
         }
-
-        $user->activated = true;
-        $user->confirm_code = null;
-        $user->save();
 
         $token = $this->guard()->login($user);
 

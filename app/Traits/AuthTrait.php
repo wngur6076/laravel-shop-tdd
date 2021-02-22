@@ -23,6 +23,6 @@ trait AuthTrait
 
     private function guard()
     {
-        return \Auth::guard();
+        return auth()->guard();
     }
 }

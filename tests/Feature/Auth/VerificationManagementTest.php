@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Auth;
 
 use Tests\TestCase;
 use App\Models\User;
@@ -24,7 +24,7 @@ class VerificationManagementTest extends TestCase
         $user = User::factory()->create(['confirm_code' => \Str::random(60), 'activated' => false]);
 
         $this->assertFalse($user->activated);
-        $response = $this->postJson('/api/auth/verification', ['code' => $user->confirm_code]);
+        $response = $this->postJson(route('verification'), ['code' => $user->confirm_code]);
         $this->assertTrue($user->fresh()->activated);
 
         $response->assertStatus(200)
@@ -40,11 +40,11 @@ class VerificationManagementTest extends TestCase
      */
     public function must_be_a_valid_verification_code()
     {
-        $response = $this->postJson('/api/auth/verification', ['code' => \Str::random(60)]);
-        $response->assertStatus(401)
+        $response = $this->postJson(route('verification'), ['code' => \Str::random(60)]);
+        $response->assertStatus(404)
             ->assertJson([
                 'status' => 'code_denied',
-                'error' => 401,
+                'error' => 404,
             ]);
     }
 }
