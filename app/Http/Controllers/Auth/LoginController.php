@@ -2,12 +2,23 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Models\User;
 use App\Traits\AuthTrait;
 use App\Http\Controllers\Controller;
 
 class LoginController extends Controller
 {
     use AuthTrait;
+
+    public function index()
+    {
+        $user = User::find(auth()->user()->id);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $user
+        ], 200);
+    }
 
     public function store()
     {

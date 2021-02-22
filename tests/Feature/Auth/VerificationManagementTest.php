@@ -20,7 +20,6 @@ class VerificationManagementTest extends TestCase
      */
     public function a_user_can_be_authenticated()
     {
-        $this->withoutExceptionHandling();
         $user = User::factory()->create(['confirm_code' => \Str::random(60), 'activated' => false]);
 
         $this->assertFalse($user->activated);

@@ -71,13 +71,58 @@ class LoginManagementTest extends TestCase
      */
     public function a_user_can_be_logout()
     {
-        $user = User::factory()->create($this->data());
-        $token = \JWTAuth::fromUser($user);
+        $token = $this->authenticate();
 
-        $this->actingAs($user)->deleteJson(route('login.destroy'), [], ['Authorization' => 'Bearer ' . $token])
+        $this->withHeaders(['Authorization' => 'Bearer '. $token])
+            ->deleteJson(route('login.destroy'))
             ->assertStatus(200);
 
         $this->assertGuest();
+    }
+
+    /**
+     * @test
+     * @testdox 인증된 사용자만 로그아웃 할 수 있다.
+     */
+    public function only_authenticated_user_can_logout()
+    {
+        $this->deleteJson(route('login.destroy'))
+            ->assertStatus(401);
+    }
+
+    /**
+     * @test
+     * @testdox 사용자는 로그인 정보를 조회 할 수 있다.
+     */
+    public function a_user_can_inquire_login_info()
+    {
+        $token = $this->authenticate();
+
+        $response = $this->withHeaders(['Authorization' => 'Bearer '. $token])
+            ->getJson(route('login.index'));
+
+        $response->assertStatus(200)
+        ->assertJson([
+            'status' => 'success',
+            'data' => true,
+        ]);
+    }
+
+    /**
+     * @test
+     * @testdox 인증된 사용자만 로그인 정보를 조회 할 수 있다.
+     */
+    public function only_authenticated_user_can_inquire_login_info()
+    {
+        $this->getJson(route('login.index'))
+            ->assertStatus(401);
+    }
+
+    protected function authenticate()
+    {
+        $user = User::factory()->create();
+
+        return \JWTAuth::fromUser($user);
     }
 
     private function data()
